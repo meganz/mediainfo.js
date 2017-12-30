@@ -1,0 +1,47 @@
+#/bin/bash
+
+audio_device="Stereomix (Realtek High Definition Audio)"
+
+make_sample() {
+    ffmpeg -f dshow -i audio="$audio_device" -f lavfi -i "testsrc=size=128x72:rate=25" -t 1 $* > /dev/null 2>&1
+    [[ $? -ne 0 ]] && echo Failed $*
+}
+
+mkdir -p ./samples
+
+containers=("avi" "mkv" "mpg" "mp4" "ogg" "webm" "mov")
+for container in "${containers[@]}"; do
+
+    vcodecs=("mpeg1video" "mpeg2video" "mpeg4" "msmpeg4v2" "h264" "hevc" "theora" "vp8" "vp9")
+    for vcodec in "${vcodecs[@]}"; do
+
+        acodecs=("mp3" "wma" "vorbis" "opus" "aac" "ac3" "eac3" "dca" "flac" "alac" "truehd")
+        for acodec in "${acodecs[@]}"; do
+            filename=samples/$vcodec-$acodec.$container
+
+            make_sample -c:v $vcodec -c:a $acodec -strict -2 -y $filename
+
+            if [ -s "./$filename" ] ; then
+                cFormat=$(mediainfo --Inform="General;%Format%" $filename)
+                cCodecID=$(mediainfo --Inform="General;%CodecID%" $filename)
+                vFormat=$(mediainfo --Inform="Video;%Format%" $filename)
+                vCodecID=$(mediainfo --Inform="Video;%CodecID%" $filename)
+                aFormat=$(mediainfo --Inform="Audio;%Format%" $filename)
+                aCodecID=$(mediainfo --Inform="Audio;%CodecID%" $filename)
+
+                echo "$cCodecID;$cFormat;;M;;;;;;$filename" >>$0.csv
+                echo "$vCodecID;$vFormat;;V;;;;;;$filename" >>$0.csv
+                echo "$aCodecID;$aFormat;;A;;;;;;$filename" >>$0.csv
+
+                [[ -z "$cCodecID" ]] && cCodecID=$cFormat;
+                [[ -z "$vCodecID" ]] && vCodecID=$vFormat;
+                [[ -z "$aCodecID" ]] && aCodecID=$aFormat;
+
+                echo "['$cCodecID', '$vCodecID', '$aCodecID'], // $filename" >> $0.js
+            fi
+        done
+    done
+done
+
+
+exit 0

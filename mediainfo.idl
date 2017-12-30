@@ -1,0 +1,11 @@
+interface MediaInfo {
+    void MediaInfo();
+    long openBufferInit (double size, double offset);
+    long openBufferContinue ([Const] Uint8Array data, long size);
+    long long openBufferGetSeekTo ();
+    long openBufferFinalize ();
+    [Const] DOMString inform ();
+    [Const] DOMString getOption ([Const] DOMString key);
+    [Const] DOMString setOption ([Const] DOMString key, [Const] DOMString value);
+    void close ();
+};

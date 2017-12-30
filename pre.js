@@ -7,3 +7,4 @@
     root.MediaInfo = factory();
   }
 }(this, function () {
+"use strict";

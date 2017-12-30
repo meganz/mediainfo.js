@@ -7,5 +7,14 @@ ThumbsDB
 ZenLib
 MediaInfoLib
 Shared
-mediainfojs.o
+*.o
+*.txt
+*.patch
+*.diff
 npm-debug.log
+WebIDLGrammar.pkl
+parser.out
+mediainfo.glue.*
+samples/
+ffsamples.csv
+ffsamples.js
