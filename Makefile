@@ -28,7 +28,7 @@ all: $(TARGET) exts.txt
 $(WASM): $(MEDIAINFOLIB) $(ZENLIB) $(ZLIB) $(GLUEJS) $(OBJS) post.js
 	$(CXX) $(CXXFLAGS) $(OBJS) $(WASMFLAGS) $(LDFLAGS) -o $@
 
-$(TARGET): $(MEDIAINFOLIB) $(ZENLIB) $(ZLIB) $(GLUEJS) $(OBJS) post.js
+$(TARGET): $(MEDIAINFOLIB) $(ZENLIB) $(ZLIB) $(GLUEJS) $(OBJS) post.js pre.js
 	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) -o $@
 	@mv mediainfo.js mediainfo_.js
 	@mv mediainfo.js.mem mediainfo.mem
