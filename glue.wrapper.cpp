@@ -38,7 +38,7 @@ public:
   }
 private:
   const char* to_c(MediaInfoLib::String s) {
-    static char tmp[1048576];
+    static char tmp[8388608];
     int len = std::min(s.size(), sizeof(tmp) - 1);
     tmp[len] = '\0';
     while (len-- > 0) {
