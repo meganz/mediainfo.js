@@ -8,18 +8,29 @@ make_sample() {
 }
 
 mkdir -p ./samples
+rm $0.js > /dev/null 2>&1
+rm $0.csv > /dev/null 2>&1
 
 containers=("avi" "mkv" "mpg" "mp4" "ogg" "webm" "mov")
 for container in "${containers[@]}"; do
 
-    vcodecs=("mpeg1video" "mpeg2video" "mpeg4" "msmpeg4v2" "h264" "hevc" "theora" "vp8" "vp9")
+    vcodecs=("mpeg1video" "mpeg2video" "mpeg4" "msmpeg4v2" "h264" "hevc" "theora" "vp8" "vp9" "av1")
     for vcodec in "${vcodecs[@]}"; do
+
+        if [ "$vcodec" = "av1" ]; then
+            if [ "$container" != "mp4" -a "$container" != "webm" -a $container != "mkv" ]; then
+                continue
+            fi
+        fi
 
         acodecs=("mp3" "wma" "vorbis" "opus" "aac" "ac3" "eac3" "dca" "flac" "alac" "truehd")
         for acodec in "${acodecs[@]}"; do
             filename=samples/$vcodec-$acodec.$container
 
-            make_sample -c:v $vcodec -c:a $acodec -strict -2 -y $filename
+            if [ ! -f "./$filename" ]; then
+                make_sample -c:v $vcodec -c:a $acodec -strict -2 -y $filename
+                touch "./$filename"
+            fi
 
             if [ -s "./$filename" ] ; then
                 cFormat=$(mediainfo --Inform="General;%Format%" $filename)

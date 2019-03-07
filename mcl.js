@@ -77,17 +77,25 @@ const shortformats = [
     ['M4A ', -1, 'mp4a-40-2'], // audio-only mp4, m4a etc..
     ['FLAC', -1, 'FLAC'],
     ['Wave', -1, 1 /*PCM*/],
+    ['WebM', 'V_AV1', 'A_VORBIS'], // samples/av1-vorbis.webm
+    ['WebM', 'V_AV1', 'A_OPUS'], // samples/av1-opus.webm
+    ['isom', 'av01', 'mp4a-40-2'], // samples/av1-aac.mp4
+    ['isom', 'av01', 'ac-3'], // samples/av1-ac3.mp4
+    ['Matroska', 'V_AV1', 'A_OPUS'], // samples/av1-opus.mkv
+    ['mp42', 'av01', 'mp4a-40-2'],
     // ['', '', ''],
 ];
 
-let mcv = 0;
+let mcv = 1;
 let sfid = 0;
 let shortformat = [];
-let containers = [];
-let video = [];
-let audio = [];
+let [ containers, video, audio ] = JSON.parse(fs.readFileSync('mcl.json', 'utf-8'))[1];
 
-const push = (a, v) => (v || v===0) && a.indexOf(''+v) < 0 && a.push(''+v);
+containers = containers.map(x => ''+x[1]);
+video = video.map(x => ''+x[1]);
+audio = audio.map(x => ''+x[1]);
+
+const push = (a, v) => (v && parseInt(v) !== 0) && a.indexOf(''+v) < 0 && a.push(''+v);
 const addContainer = c => push(containers, c);
 const addVideo = v => push(video, v);
 const addAudio = a => push(audio, a);
@@ -118,7 +126,7 @@ const addAudioVideoCodecs = type => {
     readAndForEach('CodecID_Audio_' + type, addAudio/*AndFormat*/);
 };
 
-const fixuplist = a => a.sort().map(n => parseInt(n, 10) == n ? parseInt(n) : String(n));
+const fixuplist = a => a/*.sort()*/.map(n => parseInt(n, 10) == n ? parseInt(n) : String(n));
 const makeindexes = a => a.map((e, i) => [++i, e]);
 
 const mpeg4general = read('CodecID_General_Mpeg4');
@@ -224,6 +232,9 @@ for (let i = codeccsv.length; i--;) {
     }
 }
 
+for (let i; (i = orphancodecs.indexOf('0x00000000')) > -1; ) {
+    orphancodecs.splice(i, 1);
+}
 if (orphancodecs.length) {
     process.stderr.write('Orphan codecs added from Codec.csv: ' + orphancodecs + '\n');
 }
