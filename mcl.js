@@ -13,6 +13,13 @@ const read = (n) => fs.readFileSync(path + n + '.csv', 'utf-8')
 const mp4a = ["mp4a", "mp4a-40", "mp4a-40-1", "mp4a-40-2", "mp4a-40-3", "mp4a-40-4", "mp4a-40-5", "mp4a-40-6", "mp4a-40-7", "mp4a-40-8", "mp4a-40-9", "mp4a-40-12", "mp4a-40-13", "mp4a-40-14", "mp4a-40-15", "mp4a-40-16", "mp4a-40-17", "mp4a-40-19", "mp4a-40-20", "mp4a-40-21", "mp4a-40-22", "mp4a-40-23", "mp4a-40-24", "mp4a-40-25", "mp4a-40-26", "mp4a-40-27", "mp4a-40-28", "mp4a-40-29", "mp4a-40-32", "mp4a-40-33", "mp4a-40-34", "mp4a-40-35", "mp4a-40-36", "mp4a-66", "mp4a-67", "mp4a-68", "mp4a-69", "mp4a-6B"];
 const mp4v = ["mp4v","mp4v-20","mp4v-20-1","mp4v-20-10","mp4v-20-100","mp4v-20-11","mp4v-20-113","mp4v-20-114","mp4v-20-12","mp4v-20-129","mp4v-20-130","mp4v-20-145","mp4v-20-146","mp4v-20-147","mp4v-20-148","mp4v-20-16","mp4v-20-161","mp4v-20-162","mp4v-20-163","mp4v-20-17","mp4v-20-177","mp4v-20-178","mp4v-20-179","mp4v-20-18","mp4v-20-180","mp4v-20-193","mp4v-20-194","mp4v-20-1d","mp4v-20-1e","mp4v-20-1f","mp4v-20-2","mp4v-20-209","mp4v-20-21","mp4v-20-210","mp4v-20-211","mp4v-20-22","mp4v-20-225","mp4v-20-226","mp4v-20-227","mp4v-20-228","mp4v-20-229","mp4v-20-230","mp4v-20-231","mp4v-20-232","mp4v-20-240","mp4v-20-241","mp4v-20-242","mp4v-20-243","mp4v-20-244","mp4v-20-245","mp4v-20-247","mp4v-20-248","mp4v-20-249","mp4v-20-250","mp4v-20-251","mp4v-20-252","mp4v-20-253","mp4v-20-29","mp4v-20-3","mp4v-20-30","mp4v-20-31","mp4v-20-32","mp4v-20-33","mp4v-20-34","mp4v-20-4","mp4v-20-42","mp4v-20-5","mp4v-20-50","mp4v-20-51","mp4v-20-52","mp4v-20-6","mp4v-20-61","mp4v-20-62","mp4v-20-63","mp4v-20-64","mp4v-20-66","mp4v-20-71","mp4v-20-72","mp4v-20-8","mp4v-20-81","mp4v-20-82","mp4v-20-9","mp4v-20-91","mp4v-20-92","mp4v-20-93","mp4v-20-94","mp4v-20-97","mp4v-20-98","mp4v-20-99","mp4v-20-a1","mp4v-20-a2","mp4v-20-a3","mp4v-20-b1","mp4v-20-b2","mp4v-20-b3","mp4v-20-b4","mp4v-20-c1","mp4v-20-c2","mp4v-20-d1","mp4v-20-d2","mp4v-20-d3","mp4v-20-e1","mp4v-20-e2","mp4v-20-e3","mp4v-20-e4","mp4v-20-e5","mp4v-20-e6","mp4v-20-e7","mp4v-20-e8","mp4v-20-f0","mp4v-20-f1","mp4v-20-f2","mp4v-20-f3","mp4v-20-f4","mp4v-20-f5","mp4v-20-f7","mp4v-20-f8","mp4v-20-f9","mp4v-20-fa","mp4v-20-fb","mp4v-20-fc","mp4v-20-fd"];
 
+// from https://github.com/mp4ra/mp4ra.github.io/blob/master/CSV/brands.csv
+// $ grep -P ",(?:3GPP|ISO)$" brands.csv | awk -F',' '{ gsub("\\$20"," ",$1); print $1 }' | jq -Rsc '. / "\n" - [""]'
+const mp4c = ["3ge6","3ge7","3ge9","3gf9","3gg6","3gg9","3gh9","3gm9","3gp4","3gp5","3gp6","3gp7","3gp8","3gp9","3gr6","3gr9","3gs6","3gs9","3gt8","3gt9","avc1","iso2","iso3","iso4","iso5","iso6","iso7","iso8","iso9","isoa","isob","isoc","isom"];
+
+// hand-crafted from stats event 99729 with more than 100 hits.
+mp4c.push('mp4v','nvr1','vr1d','3g2b','SNV2');
+
 // list of containers to ignore
 const format_exclusion = ["Atrac","Atrac3","BDAV","Blu-ray Clip info","Blu-ray Index","Blu-ray Movie object","Blu-ray Playlist","CDDA","CDXA","DASH MPD","DPG","DVD Video","Flash Video","HDS F4M","HLS","ISM","MXF","PMP","PTX","RealMedia","ShockWave","SKM","FLC","FLI","FLIC","Extended Module","MIDI","Module","RIFF-MIDI","Scream Tracker 3"];
 
@@ -86,7 +93,7 @@ const shortformats = [
     // ['', '', ''],
 ];
 
-let mcv = 1;
+let mcv = 2;
 let sfid = 0;
 let shortformat = [];
 let [ containers, video, audio ] = JSON.parse(fs.readFileSync('mcl.json', 'utf-8'))[1];
@@ -239,6 +246,8 @@ if (orphancodecs.length) {
     process.stderr.write('Orphan codecs added from Codec.csv: ' + orphancodecs + '\n');
 }
 
+mp4c.forEach(addContainer);
+
 // sort final arrays
 containers = fixuplist(containers);
 video = fixuplist(video);
@@ -272,6 +281,15 @@ for (let x = 0; x < shortformats.length; x++) {
 containers = makeindexes(containers);
 video = makeindexes(video);
 audio = makeindexes(audio);
+
+console.info('videocodec', video.length);
+console.info('audiocodec', audio.length);
+console.info('containers', containers.length);
+console.info('shortfrmat', shortformat.length);
+
+if (containers.length > 254) {
+    die('ERROR: More than 255 containers!');
+}
 
 const list = [
     ++mcv, // version
